@@ -1,0 +1,94 @@
+<%- include('layout', { title, body: `
+  <section class="card panel">
+    <h2>Nueva cita</h2>
+    <% if (error) { %>
+      <div class="alert error"><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+      <div class="alert success"><%= success %></div>
+    <% } %>
+
+    <form method="POST" action="/appointments/new">
+      <div class="form-grid">
+        <div>
+          <label for="doctor_id">Odontólogo</label>
+          <select id="doctor_id" name="doctor_id" required>
+            <option value="">Seleccione un odontólogo</option>
+            <% doctors.forEach((doctor) => { %>
+              <option value="<%= doctor.id %>"><%= doctor.full_name %> - <%= doctor.specialty %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label for="appointment_date">Fecha</label>
+          <input id="appointment_date" name="appointment_date" type="date" required />
+        </div>
+        <div>
+          <label for="appointment_time">Horario disponible</label>
+          <select id="appointment_time" name="appointment_time" required>
+            <option value="">Seleccione un horario</option>
+          </select>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label for="treatment">Tratamiento</label>
+          <input id="treatment" name="treatment" required placeholder="Ej. Limpieza dental, ortodoncia, empaste, etc." />
+        </div>
+      </div>
+      <div style="margin-top: 24px;">
+        <button type="submit" class="btn">Reservar cita</button>
+      </div>
+    </form>
+
+    <div id="availabilityBox" style="margin-top: 28px; display: none;">
+      <h3>Horarios disponibles</h3>
+      <div id="slots" class="slot-list"></div>
+    </div>
+  </section>
+
+  <script>
+    const doctorSelect = document.getElementById('doctor_id');
+    const dateInput = document.getElementById('appointment_date');
+    const timeInput = document.getElementById('appointment_time');
+    const slotsContainer = document.getElementById('slots');
+    const availabilityBox = document.getElementById('availabilityBox');
+
+    async function loadAvailability() {
+      const doctorId = doctorSelect.value;
+      const date = dateInput.value;
+      if (!doctorId || !date) {
+        availabilityBox.style.display = 'none';
+        slotsContainer.innerHTML = '';
+        timeInput.innerHTML = '<option value="">Seleccione un horario</option>';
+        return;
+      }
+
+      const response = await fetch(`/api/doctors/${doctorId}/availability?date=${date}`);
+      const data = await response.json();
+      slotsContainer.innerHTML = '';
+      timeInput.innerHTML = '<option value="">Seleccione un horario</option>';
+
+      if (!data.slots || data.slots.length === 0) {
+        availabilityBox.style.display = 'block';
+        slotsContainer.innerHTML = '<p class="muted">No hay horarios disponibles para ese día.</p>';
+        return;
+      }
+
+      data.slots.forEach((slot) => {
+        const option = document.createElement('option');
+        option.value = slot;
+        option.textContent = slot;
+        timeInput.appendChild(option);
+
+        const item = document.createElement('span');
+        item.className = 'slot';
+        item.textContent = slot;
+        slotsContainer.appendChild(item);
+      });
+
+      availabilityBox.style.display = 'block';
+    }
+
+    doctorSelect.addEventListener('change', loadAvailability);
+    dateInput.addEventListener('change', loadAvailability);
+  </script>
+`}) %>

@@ -1,0 +1,41 @@
+<%- include('layout', { title, body: `
+  <section class="card panel">
+    <h2>Registro de odontólogo</h2>
+    <% if (error) { %>
+      <div class="alert error"><%= error %></div>
+    <% } %>
+    <% if (success) { %>
+      <div class="alert success"><%= success %></div>
+    <% } %>
+
+    <form method="POST" action="/doctor/register">
+      <div class="form-grid">
+        <div>
+          <label>Especialidad</label>
+          <select name="specialty" required>
+            <option value="Odontología general">Odontología general</option>
+            <option value="Ortodoncia">Ortodoncia</option>
+            <option value="Implantología">Implantología</option>
+            <option value="Endodoncia">Endodoncia</option>
+            <option value="Estética dental">Estética dental</option>
+          </select>
+        </div>
+        <div>
+          <label>Años de experiencia</label>
+          <input type="number" name="experience_years" min="0" value="0" required />
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label>Disponibilidad</label>
+          <textarea name="availability" placeholder="Ej. Lunes a viernes de 9:00 a 17:00, con pausa de almuerzo de 13:00 a 14:00.">Lunes a viernes de 9:00 a 17:00.</textarea>
+        </div>
+        <div style="grid-column: 1 / -1;">
+          <label>Biografía profesional</label>
+          <textarea name="bio" placeholder="Descripción de la experiencia y enfoque clínico.">Especialista en salud oral con enfoque preventivo y restaurativo.</textarea>
+        </div>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn">Guardar perfil</button>
+      </div>
+    </form>
+  </section>
+`}) %>

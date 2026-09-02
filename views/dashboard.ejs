@@ -1,0 +1,72 @@
+<%- include('layout', { title, body: `
+  <section class="card hero">
+    <h1>Panel principal</h1>
+    <p>Bienvenido, <strong><%= user.full_name %></strong>. Revisa tus citas, disponibilidad y notificaciones.</p>
+  </section>
+
+  <section class="grid" style="margin-bottom: 30px;">
+    <div class="card panel">
+      <h3>Resumen</h3>
+      <ul class="list">
+        <li><strong>Rol:</strong> <%= user.role %></li>
+        <li><strong>Correo:</strong> <%= user.email %></li>
+        <li><strong>Cédula:</strong> <%= user.ci %></li>
+      </ul>
+    </div>
+
+    <div class="card panel">
+      <h3>Odontólogos disponibles</h3>
+      <ul class="list">
+        <% doctors.forEach((doctor) => { %>
+          <li>
+            <strong><%= doctor.full_name %></strong><br />
+            <span class="muted"><%= doctor.specialty %></span>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card panel" style="margin-bottom: 30px;">
+    <h3>Notificaciones</h3>
+    <% if (!notifications.length) { %>
+      <p class="muted">No tienes notificaciones por ahora.</p>
+    <% } else { %>
+      <ul class="list">
+        <% notifications.forEach((n) => { %>
+          <li><%= n.message %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </section>
+
+  <section class="card panel">
+    <h3>Citas programadas</h3>
+    <% if (!appointments.length) { %>
+      <p class="muted">Aún no tienes citas agendadas.</p>
+    <% } else { %>
+      <table>
+        <thead>
+          <tr>
+            <th>Paciente / Doctor</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Tratamiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% appointments.forEach((a) => { %>
+            <tr>
+              <td><%= a.patient_name || a.doctor_name %></td>
+              <td><%= a.appointment_date %></td>
+              <td><%= a.appointment_time %></td>
+              <td><%= a.treatment %></td>
+              <td><%= a.status %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </section>
+`}) %>
