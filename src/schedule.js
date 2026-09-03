@@ -18,6 +18,34 @@ function calculateEndTime(startTime, durationMinutes) {
   return toTime(total);
 }
 
+function parseAvailability(availability = '') {
+  const matches = [...String(availability).matchAll(/(\d{1,2})(?::(\d{2}))?\s*(?:a|-)\s*(\d{1,2})(?::(\d{2}))?/gi)];
+  const range = matches[0];
+  if (!range) {
+    return { startHour: 9, endHour: 17, lunchStart: 13, lunchEnd: 14, weekdaysOnly: false };
+  }
+
+  const startHour = Number(range[1]);
+  const endHour = Number(range[3]);
+  if (startHour < 0 || startHour > 23 || endHour <= startHour || endHour > 24) {
+    return { startHour: 9, endHour: 17, lunchStart: 13, lunchEnd: 14, weekdaysOnly: false };
+  }
+
+  return {
+    startHour,
+    endHour,
+    lunchStart: 13,
+    lunchEnd: 14,
+    weekdaysOnly: /lunes\s+a\s+viernes/i.test(String(availability))
+  };
+}
+
+function isAvailableDate(date, availability) {
+  if (!availability.weekdaysOnly) return true;
+  const day = new Date(`${date}T00:00:00`).getDay();
+  return day >= 1 && day <= 5;
+}
+
 function generateDoctorSlots({ startHour, endHour, duration, lunchStart, lunchEnd, existing = [] }) {
   const slots = [];
   const existingSet = new Set(existing);
@@ -45,6 +73,8 @@ function generateDoctorSlots({ startHour, endHour, duration, lunchStart, lunchEn
 module.exports = {
   generateDoctorSlots,
   calculateEndTime,
+  parseAvailability,
+  isAvailableDate,
   toMinutes,
   toTime
 };

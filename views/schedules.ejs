@@ -30,7 +30,7 @@ const body = `
   ${selectedDoctor ? `
     <section class="premium-card" style="margin-top: 22px;">
       <h3>${selectedDoctor.full_name}</h3>
-      <p class="muted">${selectedDate} · Atención de 09:00 a 17:00, con pausa de 13:00 a 14:00.</p>
+      <p class="muted">${selectedDate} · ${selectedDoctor.availability || 'Lunes a viernes de 09:00 a 17:00.'}</p>
       <div class="slot-list">
         ${slots.length ? slots.map(slot => `<span class="slot">${slot}</span>`).join('') : '<p class="muted">No quedan horarios disponibles para esta fecha.</p>'}
       </div>

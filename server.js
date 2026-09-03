@@ -9,7 +9,7 @@ const helmet = require('helmet');
 const { rateLimit } = require('express-rate-limit');
 const path = require('path');
 const { initDatabase, run, get, all } = require('./src/db');
-const { generateDoctorSlots, calculateEndTime } = require('./src/schedule');
+const { generateDoctorSlots, calculateEndTime, parseAvailability, isAvailableDate } = require('./src/schedule');
 const { sendAppointmentEmail, sendAppointmentCancellationEmail, verifyMailer } = require('./src/mailer');
 
 const app = express();
@@ -280,14 +280,10 @@ app.get('/schedules', async (req, res) => {
       'SELECT appointment_time FROM appointments WHERE doctor_id = ? AND appointment_date = ?',
       [selectedDoctor.id, selectedDate]
     );
-    slots = generateDoctorSlots({
-      startHour: 9,
-      endHour: 17,
-      duration: 30,
-      lunchStart: 13,
-      lunchEnd: 14,
-      existing: appointments.map(appointment => appointment.appointment_time)
-    });
+    const availability = parseAvailability(selectedDoctor.availability);
+    slots = isAvailableDate(selectedDate, availability)
+      ? generateDoctorSlots({ ...availability, duration: 30, existing: appointments.map(appointment => appointment.appointment_time) })
+      : [];
   }
 
   res.render('schedules', {
@@ -501,14 +497,10 @@ app.post('/appointments/new', requireAuth, async (req, res) => {
   );
 
   const existingTimes = existingAppointments.map(item => item.appointment_time);
-  const slots = generateDoctorSlots({
-    startHour: 9,
-    endHour: 17,
-    duration: 30,
-    lunchStart: 13,
-    lunchEnd: 14,
-    existing: existingTimes
-  });
+  const availability = parseAvailability(doctor.availability);
+  const slots = isAvailableDate(date, availability)
+    ? generateDoctorSlots({ ...availability, duration: 30, existing: existingTimes })
+    : [];
 
   if (!slots.includes(appointment_time)) {
     return renderForm('El horario seleccionado ya no está disponible o no pertenece a la agenda del doctor.');
@@ -568,14 +560,10 @@ app.get('/api/doctors/:id/availability', requireAuth, async (req, res) => {
   );
 
   const existingTimes = existingAppointments.map(item => item.appointment_time);
-  const slots = generateDoctorSlots({
-    startHour: 9,
-    endHour: 17,
-    duration: 30,
-    lunchStart: 13,
-    lunchEnd: 14,
-    existing: existingTimes
-  });
+  const availability = parseAvailability(doctor.availability);
+  const slots = isAvailableDate(date, availability)
+    ? generateDoctorSlots({ ...availability, duration: 30, existing: existingTimes })
+    : [];
 
   res.json({ slots });
 });
