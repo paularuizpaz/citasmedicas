@@ -49,7 +49,7 @@ const analyticsSection = analyticsData ? `
   <section class="premium-card" style="margin-bottom: 30px;">
     <div class="eyebrow">Decisiones administrativas</div>
     <h2 style="margin: 10px 0 8px;">Indicadores de citas</h2>
-    <p class="muted" style="margin: 0 0 20px;">Resumen de la demanda registrada para organizar médicos y horarios.</p>
+    <p class="muted" style="margin: 0 0 20px;">Resumen de la demanda registrada para organizar médicos y horarios. El gráfico diario muestra los últimos 14 días con actividad.</p>
 
     <section class="metric-grid" style="margin: 0 0 26px;">
       <div class="metric-box">
@@ -74,21 +74,21 @@ const analyticsSection = analyticsData ? `
       <div>
         <h3>Citas por día</h3>
         ${analyticsData.appointmentsByDay.length ? `
-          <div class="bar-chart">${analyticsData.appointmentsByDay.map(day => `<div class="bar-row"><span>${day.appointment_date}</span><div class="bar-track"><i style="width: ${Math.max(8, day.total / maxDayTotal * 100)}%"></i></div><strong>${day.total}</strong></div>`).join('')}</div>
+          <div class="bar-chart analytics-chart">${analyticsData.appointmentsByDay.map(day => `<div class="bar-row"><span>${day.appointment_date}</span><div class="bar-track"><i style="width: ${Math.max(8, day.total / maxDayTotal * 100)}%"></i></div><strong>${day.total}</strong></div>`).join('')}</div>
         ` : '<p class="muted">Aún no hay citas registradas.</p>'}
       </div>
 
       <div>
         <h3>Médicos con más citas</h3>
         ${analyticsData.appointmentsByDoctor.length ? `
-          <div class="bar-chart">${analyticsData.appointmentsByDoctor.map(doctor => `<div class="bar-row"><span>${doctor.doctor_name}</span><div class="bar-track"><i style="width: ${Math.max(8, doctor.total / maxDoctorTotal * 100)}%"></i></div><strong>${doctor.total}</strong></div>`).join('')}</div>
+          <div class="bar-chart analytics-chart">${analyticsData.appointmentsByDoctor.map(doctor => `<div class="bar-row"><span>${doctor.doctor_name}</span><div class="bar-track"><i style="width: ${Math.max(8, doctor.total / maxDoctorTotal * 100)}%"></i></div><strong>${doctor.total}</strong></div>`).join('')}</div>
         ` : '<p class="muted">Aún no hay citas para comparar médicos.</p>'}
       </div>
 
       <div style="grid-column: 1 / -1;">
         <h3>Horarios elegidos por los pacientes</h3>
         ${analyticsData.appointmentsByHour.length ? `
-          <div class="bar-chart hour-chart">${analyticsData.appointmentsByHour.map(hour => `<div class="bar-row"><span>${hour.appointment_time}</span><div class="bar-track"><i style="width: ${Math.max(8, hour.total / maxHourTotal * 100)}%"></i></div><strong>${hour.total}</strong></div>`).join('')}</div>
+          <div class="bar-chart hour-chart analytics-chart">${analyticsData.appointmentsByHour.map(hour => `<div class="bar-row"><span>${hour.appointment_time}</span><div class="bar-track"><i style="width: ${Math.max(8, hour.total / maxHourTotal * 100)}%"></i></div><strong>${hour.total}</strong></div>`).join('')}</div>
         ` : '<p class="muted">Aún no hay horarios registrados.</p>'}
       </div>
     </div>
@@ -148,7 +148,7 @@ const body = `
 
   <section class="premium-card">
     <h3>Citas programadas</h3>
-    ${appointmentsTable}
+    <div class="table-scroll">${appointmentsTable}</div>
   </section>
 `;
 %>
