@@ -1,37 +1,63 @@
-<%- include('layout', { title, body: `
-  <section class="card panel">
-    <h2>Crear cuenta</h2>
-    <% if (error) { %>
-      <div class="alert error"><%= error %></div>
-    <% } %>
+<%
+const body = `
+  <section class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="eyebrow">Nueva cuenta</span>
+        <h2>Crear tu perfil</h2>
+      </div>
 
-    <form method="POST" action="/register">
-      <div class="form-grid">
-        <div>
-          <label>Nombre completo</label>
-          <input name="full_name" required />
+      ${error ? `<div class="alert error">${error}</div>` : ''}
+
+      <form method="POST" action="/register">
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <div class="form-grid">
+          <div>
+            <label>Nombre</label>
+            <input name="first_name" required placeholder="Ej. Ana" />
+          </div>
+          <div>
+            <label>Apellido</label>
+            <input name="last_name" required placeholder="Ej. García" />
+          </div>
+          <div>
+            <label>Carnet de identidad</label>
+            <input name="ci" required placeholder="Ej. 12345678" />
+          </div>
+          <div>
+            <label>Celular</label>
+            <input name="phone" required placeholder="Ej. 700 123 456" />
+          </div>
+          <div>
+            <label>Correo electrónico</label>
+            <input type="email" name="email" required placeholder="correo@ejemplo.com" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label>Contraseña</label>
+            <input type="password" name="password" required placeholder="********" />
+          </div>
         </div>
-        <div>
-          <label>Cédula de identidad</label>
-          <input name="ci" required />
+
+        <div class="auth-actions">
+          <button type="submit" class="btn">Registrarme</button>
+          <a href="/login" class="button-link">Ya tengo cuenta</a>
         </div>
-        <div>
-          <label>Correo electrónico</label>
-          <input type="email" name="email" required />
-        </div>
-        <div>
-          <label>Teléfono</label>
-          <input name="phone" />
-        </div>
-        <div>
-          <label>Contraseña</label>
-          <input type="password" name="password" required />
-        </div>
+      </form>
+    </div>
+
+    <aside class="benefit-panel">
+      <div class="mini-stat">
+        <span>Comodidad</span>
+        <strong>100%</strong>
       </div>
-      <div style="margin-top: 20px; display: flex; gap: 12px; align-items: center;">
-        <button type="submit" class="btn">Registrarme</button>
-        <a href="/login" class="muted">Ya tengo cuenta</a>
-      </div>
-    </form>
+      <h3>Agenda tu próxima cita</h3>
+      <ul class="benefit-list">
+        <li>Consulta disponible por especialista</li>
+        <li>Optimizamos tu tiempo de atención</li>
+        <li>Seguimiento y confirmación por email</li>
+      </ul>
+    </aside>
   </section>
-`}) %>
+`;
+%>
+<%- include('layout', { title, body }) %>

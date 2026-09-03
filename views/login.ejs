@@ -1,30 +1,47 @@
-<%- include('layout', { title, body: `
-  <section class="card hero">
-    <h1>Bienvenido a DentalCare+</h1>
-    <p>Gestiona citas odontológicas con disponibilidad por doctor y día.</p>
-  </section>
-
-  <section class="card panel">
-    <h2>Iniciar sesión</h2>
-    <% if (error) { %>
-      <div class="alert error"><%= error %></div>
-    <% } %>
-
-    <form method="POST" action="/login">
-      <div class="form-grid">
-        <div>
-          <label for="ci">Cédula de identidad</label>
-          <input id="ci" name="ci" required placeholder="Ej. 12345678" />
-        </div>
-        <div>
-          <label for="password">Contraseña</label>
-          <input id="password" name="password" type="password" required placeholder="********" />
-        </div>
+<%
+const body = `
+  <section class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="eyebrow">Acceso clínico</span>
+        <h2>Iniciar sesión</h2>
       </div>
-      <div style="margin-top: 20px; display: flex; gap: 12px; align-items: center;">
-        <button type="submit" class="btn">Entrar</button>
-        <a href="/register" class="muted">Crear cuenta</a>
+
+      ${error ? `<div class="alert error">${error}</div>` : ''}
+
+      <form method="POST" action="/login">
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <div class="form-grid">
+          <div>
+            <label for="ci">Cédula de identidad</label>
+            <input id="ci" name="ci" required placeholder="Ej. 12345678" />
+          </div>
+          <div>
+            <label for="password">Contraseña</label>
+            <input id="password" name="password" type="password" required placeholder="********" />
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" class="btn">Entrar</button>
+          <a href="/register" class="button-link">Crear cuenta</a>
+        </div>
+      </form>
+    </div>
+
+    <aside class="benefit-panel">
+      <div class="mini-stat">
+        <span>Atención premium</span>
+        <strong>24/7</strong>
       </div>
-    </form>
+      <h3>Tu salud, en buenas manos</h3>
+      <ul class="benefit-list">
+        <li>Reservas rápidas y seguras</li>
+        <li>Doctores especialistas disponibles</li>
+        <li>Recordatorios automáticos por email</li>
+      </ul>
+    </aside>
   </section>
-`}) %>
+`;
+%>
+<%- include('layout', { title, body }) %>

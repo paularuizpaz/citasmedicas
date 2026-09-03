@@ -1,0 +1,29 @@
+<%
+const body = `
+  <section class="premium-card" style="margin-top: 24px; margin-bottom: 22px;">
+    <div class="eyebrow">Directorio médico</div>
+    <h1 style="margin: 10px 0 8px;">Doctores registrados</h1>
+    <p class="muted" style="margin: 0;">Consulta los especialistas disponibles y revisa sus horarios de atención.</p>
+  </section>
+
+  <section class="grid">
+    ${doctors.length ? doctors.map((doctor) => `
+      <article class="premium-card">
+        <div class="eyebrow">${doctor.specialty}</div>
+        <h3 style="margin: 8px 0;">${doctor.full_name}</h3>
+        <p class="muted">${doctor.bio || 'Perfil profesional disponible para nuevas consultas.'}</p>
+        <ul class="list">
+          <li><strong>Correo:</strong> ${doctor.email}</li>
+          <li><strong>Experiencia:</strong> ${doctor.experience_years || 0} años</li>
+          <li><strong>Disponibilidad:</strong> ${doctor.availability || 'Lunes a viernes de 09:00 a 17:00'}</li>
+        </ul>
+        <div class="auth-actions">
+          <a class="btn secondary" href="/schedules?doctor_id=${doctor.id}">Ver horarios</a>
+          ${user && (user.role === 'admin' || (user.role === 'doctor' && user.id === doctor.user_id)) ? `<a class="button-link" href="/doctors/${doctor.id}/edit">Modificar datos</a>` : ''}
+        </div>
+      </article>
+    `).join('') : '<div class="premium-card"><p class="muted">Todavía no hay doctores registrados.</p></div>'}
+  </section>
+`;
+%>
+<%- include('layout', { title, body, user }) %>

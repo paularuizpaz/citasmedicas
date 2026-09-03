@@ -1,0 +1,41 @@
+<%
+const body = `
+  <section class="premium-card" style="margin-top: 24px; margin-bottom: 22px;">
+    <div class="eyebrow">Agenda clínica</div>
+    <h1 style="margin: 10px 0 8px;">Horarios disponibles</h1>
+    <p class="muted" style="margin: 0;">Cada espacio tiene una duración de 30 minutos. Los horarios ocupados no aparecen disponibles.</p>
+  </section>
+
+  <section class="premium-card">
+    <form method="GET" action="/schedules">
+      <div class="form-grid">
+        <div>
+          <label for="doctor_id">Doctor</label>
+          <select id="doctor_id" name="doctor_id" required>
+            ${doctors.map((doctor) => `<option value="${doctor.id}" ${String(doctor.id) === String(selectedDoctorId) ? 'selected' : ''}>${doctor.full_name} - ${doctor.specialty}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label for="date">Fecha</label>
+          <input id="date" name="date" type="date" value="${selectedDate}" required />
+        </div>
+      </div>
+      <div class="auth-actions">
+        <button class="btn" type="submit">Consultar horarios</button>
+        ${selectedDoctor && user && (user.role === 'admin' || (user.role === 'doctor' && user.id === selectedDoctor.user_id)) ? `<a class="button-link" href="/doctors/${selectedDoctor.id}/edit">Modificar datos y disponibilidad</a>` : ''}
+      </div>
+    </form>
+  </section>
+
+  ${selectedDoctor ? `
+    <section class="premium-card" style="margin-top: 22px;">
+      <h3>${selectedDoctor.full_name}</h3>
+      <p class="muted">${selectedDate} · Atención de 09:00 a 17:00, con pausa de 13:00 a 14:00.</p>
+      <div class="slot-list">
+        ${slots.length ? slots.map(slot => `<span class="slot">${slot}</span>`).join('') : '<p class="muted">No quedan horarios disponibles para esta fecha.</p>'}
+      </div>
+    </section>
+  ` : '<section class="premium-card" style="margin-top: 22px;"><p class="muted">No hay doctores registrados para consultar.</p></section>'}
+`;
+%>
+<%- include('layout', { title, body, user }) %>

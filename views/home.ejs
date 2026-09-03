@@ -1,0 +1,38 @@
+<%
+const body = `
+  <main class="home-shell">
+    <header class="home-nav">
+      <a href="/" class="home-brand"><span class="home-brand-mark">+</span><strong>Dental</strong><span>Rojas</span></a>
+      <nav class="home-links" aria-label="Navegación principal">
+        <a href="/">Inicio</a>
+        <a href="/doctors">Doctores</a>
+        <a href="/schedules">Horarios</a>
+        <a href="/login">Contacto</a>
+        <a href="/login" class="btn home-button">Servicio en línea</a>
+      </nav>
+    </header>
+    <section class="home-hero">
+      <div class="home-hero-content">
+        <div class="home-kicker">Cuidado dental cercano y profesional</div>
+        <h1>Una sonrisa sana cambia tu día.</h1>
+        <p>Encuentra especialistas, revisa sus horarios y reserva tu próxima consulta en pocos minutos.</p>
+        <div class="home-actions"><a href="/register" class="btn">Agendar mi cita</a><a href="/doctors" class="btn outline">Conocer especialistas</a></div>
+      </div>
+    </section>
+    <section class="home-info" aria-label="Información de atención">
+      <article><small>HORARIOS</small><strong>Lun - Sáb · 9:00 - 17:00</strong></article>
+      <article><small>RESERVA EN LÍNEA</small><strong>Elige tu especialista y horario</strong></article>
+      <article><small>ATENCIÓN</small><strong>Profesional, humana y segura</strong></article>
+    </section>
+    <section class="home-services" id="servicios">
+      <div class="home-section-heading"><div class="home-kicker">Todo empieza con una visita</div><h2>Tu salud oral, con el cuidado que merece.</h2><p>Una experiencia simple para que puedas concentrarte en lo importante: sentirte bien y sonreír con confianza.</p></div>
+      <div class="service-grid">
+        <article class="service-card"><span>01</span><h3>Odontología general</h3><p>Prevención y tratamientos para cuidar tu sonrisa todos los días.</p></article>
+        <article class="service-card"><span>02</span><h3>Especialistas disponibles</h3><p>Conoce perfiles profesionales y encuentra la atención adecuada.</p></article>
+        <article class="service-card"><span>03</span><h3>Agenda sin complicaciones</h3><p>Consulta horarios reales y reserva el momento que te conviene.</p></article>
+      </div>
+    </section>
+  </main>
+`;
+%>
+<%- include('layout', { title, body, home: true }) %>

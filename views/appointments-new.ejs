@@ -1,94 +1,142 @@
-<%- include('layout', { title, body: `
-  <section class="card panel">
-    <h2>Nueva cita</h2>
-    <% if (error) { %>
-      <div class="alert error"><%= error %></div>
-    <% } %>
-    <% if (success) { %>
-      <div class="alert success"><%= success %></div>
-    <% } %>
+<%
+var doctorOptions = '';
+if (Array.isArray(doctors)) {
+  doctorOptions = doctors.map(function (doctor) {
+    return '<option value="' + doctor.id + '">' + doctor.full_name + ' - ' + doctor.specialty + '</option>';
+  }).join('');
+}
 
-    <form method="POST" action="/appointments/new">
-      <div class="form-grid">
-        <div>
-          <label for="doctor_id">Odontólogo</label>
-          <select id="doctor_id" name="doctor_id" required>
-            <option value="">Seleccione un odontólogo</option>
-            <% doctors.forEach((doctor) => { %>
-              <option value="<%= doctor.id %>"><%= doctor.full_name %> - <%= doctor.specialty %></option>
-            <% }) %>
-          </select>
-        </div>
-        <div>
-          <label for="appointment_date">Fecha</label>
-          <input id="appointment_date" name="appointment_date" type="date" required />
-        </div>
-        <div>
-          <label for="appointment_time">Horario disponible</label>
-          <select id="appointment_time" name="appointment_time" required>
-            <option value="">Seleccione un horario</option>
-          </select>
-        </div>
-        <div style="grid-column: 1 / -1;">
-          <label for="treatment">Tratamiento</label>
-          <input id="treatment" name="treatment" required placeholder="Ej. Limpieza dental, ortodoncia, empaste, etc." />
-        </div>
-      </div>
-      <div style="margin-top: 24px;">
-        <button type="submit" class="btn">Reservar cita</button>
-      </div>
-    </form>
+var patientOptions = '';
+if (Array.isArray(patients)) {
+  patientOptions = patients.map(function (patient) {
+    return '<option value="' + patient.id + '">' + patient.carnet + ' - ' + patient.first_name + ' ' + patient.last_name + '</option>';
+  }).join('');
+}
 
-    <div id="availabilityBox" style="margin-top: 28px; display: none;">
-      <h3>Horarios disponibles</h3>
-      <div id="slots" class="slot-list"></div>
-    </div>
-  </section>
+var canChoosePatient = user && (user.role === 'doctor' || user.role === 'admin');
 
-  <script>
-    const doctorSelect = document.getElementById('doctor_id');
-    const dateInput = document.getElementById('appointment_date');
-    const timeInput = document.getElementById('appointment_time');
-    const slotsContainer = document.getElementById('slots');
-    const availabilityBox = document.getElementById('availabilityBox');
-
-    async function loadAvailability() {
-      const doctorId = doctorSelect.value;
-      const date = dateInput.value;
-      if (!doctorId || !date) {
-        availabilityBox.style.display = 'none';
-        slotsContainer.innerHTML = '';
-        timeInput.innerHTML = '<option value="">Seleccione un horario</option>';
-        return;
-      }
-
-      const response = await fetch(`/api/doctors/${doctorId}/availability?date=${date}`);
-      const data = await response.json();
-      slotsContainer.innerHTML = '';
-      timeInput.innerHTML = '<option value="">Seleccione un horario</option>';
-
-      if (!data.slots || data.slots.length === 0) {
-        availabilityBox.style.display = 'block';
-        slotsContainer.innerHTML = '<p class="muted">No hay horarios disponibles para ese día.</p>';
-        return;
-      }
-
-      data.slots.forEach((slot) => {
-        const option = document.createElement('option');
-        option.value = slot;
-        option.textContent = slot;
-        timeInput.appendChild(option);
-
-        const item = document.createElement('span');
-        item.className = 'slot';
-        item.textContent = slot;
-        slotsContainer.appendChild(item);
-      });
-
-      availabilityBox.style.display = 'block';
-    }
-
-    doctorSelect.addEventListener('change', loadAvailability);
-    dateInput.addEventListener('change', loadAvailability);
-  </script>
-`}) %>
+var body = [
+  '<section class="auth-shell">',
+  '  <div class="auth-card">',
+  '    <div class="auth-header">',
+  '      <span class="eyebrow">Cita médica</span>',
+  '      <h2>Nueva cita</h2>',
+  '    </div>',
+  error ? '    <div class="alert error">' + error + '</div>' : '',
+  success ? '    <div class="alert success">' + success + '</div>' : '',
+  '    <form method="POST" action="/appointments/new">',
+  '      <input type="hidden" name="_csrf" value="' + csrfToken + '">',
+  '      <div class="form-grid">',
+  canChoosePatient ? '        <div style="grid-column: 1 / -1;">' : '',
+  canChoosePatient ? '          <label for="patient_id">Paciente registrado</label>' : '',
+  canChoosePatient ? '          <select id="patient_id" name="patient_id">' : '',
+  canChoosePatient ? '            <option value="">Registrar un paciente nuevo</option>' : '',
+  canChoosePatient ? '            ' + patientOptions : '',
+  canChoosePatient ? '          </select>' : '',
+  canChoosePatient ? '        </div>' : '',
+  canChoosePatient ? '        <div style="grid-column: 1 / -1;">' : '',
+  canChoosePatient ? '          <label>Datos del paciente nuevo</label>' : '',
+  canChoosePatient ? '          <div class="form-grid">' : '',
+  canChoosePatient ? '            <input name="patient_carnet" placeholder="Carnet" />' : '',
+  canChoosePatient ? '            <input name="first_name" placeholder="Nombre" />' : '',
+  canChoosePatient ? '            <input name="last_name" placeholder="Apellido" />' : '',
+  canChoosePatient ? '            <input name="phone" placeholder="Celular" />' : '',
+  canChoosePatient ? '            <input type="email" name="patient_email" placeholder="Correo del paciente" />' : '',
+  canChoosePatient ? '          </div>' : '',
+  canChoosePatient ? '        </div>' : '',
+  '        <div>',
+  '          <label for="doctor_id">Odontólogo</label>',
+  '          <select id="doctor_id" name="doctor_id" required>',
+  '            <option value="">Seleccione un odontólogo</option>',
+  '            ' + doctorOptions,
+  '          </select>',
+  '        </div>',
+  '        <div>',
+  '          <label for="appointment_date">Fecha</label>',
+  '          <input id="appointment_date" name="appointment_date" type="date" required />',
+  '        </div>',
+  '        <div>',
+  '          <label for="appointment_time">Horario disponible</label>',
+  '          <select id="appointment_time" name="appointment_time" required>',
+  '            <option value="">Seleccione un horario</option>',
+  '          </select>',
+  '        </div>',
+  '        <div style="grid-column: 1 / -1;">',
+  '          <label for="treatment">Tratamiento</label>',
+  '          <input id="treatment" name="treatment" required placeholder="Ej. Limpieza dental, ortodoncia, empaste, etc." />',
+  '        </div>',
+  '      </div>',
+  '      <div class="auth-actions">',
+  '        <button type="submit" class="btn">Reservar cita</button>',
+  '      </div>',
+  '    </form>',
+  '  </div>',
+  '  <aside class="benefit-panel">',
+  '    <div class="mini-stat">',
+  '      <span>Disponibilidad</span>',
+  '      <strong>Hoy</strong>',
+  '    </div>',
+  '    <h3>Agenda en segundos</h3>',
+  '    <ul class="benefit-list">',
+  '      <li>Horarios reales por médico</li>',
+  '      <li>Confirmación rápida y segura</li>',
+  '      <li>Soporte para tratamientos prioritarios</li>',
+  '    </ul>',
+  '  </aside>',
+  '  <div id="availabilityBox" style="margin-top: 28px; display: none; grid-column: 1 / -1;">',
+  '    <div class="premium-card">',
+  '      <h3>Horarios disponibles</h3>',
+  '      <div id="slots" class="slot-list"></div>',
+  '    </div>',
+  '  </div>',
+  '</section>',
+  '',
+  '<script>',
+  '  const doctorSelect = document.getElementById("doctor_id");',
+  '  const dateInput = document.getElementById("appointment_date");',
+  '  const timeInput = document.getElementById("appointment_time");',
+  '  const slotsContainer = document.getElementById("slots");',
+  '  const availabilityBox = document.getElementById("availabilityBox");',
+  '',
+  '  async function loadAvailability() {',
+  '    const doctorId = doctorSelect.value;',
+  '    const date = dateInput.value;',
+  '    if (!doctorId || !date) {',
+  '      availabilityBox.style.display = "none";',
+  '      slotsContainer.innerHTML = "";',
+  '      timeInput.innerHTML = "<option value=\\"\\">Seleccione un horario</option>";',
+  '      return;',
+  '    }',
+  '',
+  '    const response = await fetch("/api/doctors/" + doctorId + "/availability?date=" + date);',
+  '    const data = await response.json();',
+  '    slotsContainer.innerHTML = "";',
+  '    timeInput.innerHTML = "<option value=\\"\\">Seleccione un horario</option>";',
+  '',
+  '    if (!data.slots || data.slots.length === 0) {',
+  '      availabilityBox.style.display = "block";',
+  '      slotsContainer.innerHTML = "<p class=\\"muted\\">No hay horarios disponibles para ese día.</p>";',
+  '      return;',
+  '    }',
+  '',
+  '    data.slots.forEach((slot) => {',
+  '      const option = document.createElement("option");',
+  '      option.value = slot;',
+  '      option.textContent = slot;',
+  '      timeInput.appendChild(option);',
+  '',
+  '      const item = document.createElement("span");',
+  '      item.className = "slot";',
+  '      item.textContent = slot;',
+  '      slotsContainer.appendChild(item);',
+  '    });',
+  '',
+  '    availabilityBox.style.display = "block";',
+  '  }',
+  '',
+  '  doctorSelect.addEventListener("change", loadAvailability);',
+  '  dateInput.addEventListener("change", loadAvailability);',
+  '</script>'
+].join('\n');
+%>
+<%- include('layout', { title, body }) %>

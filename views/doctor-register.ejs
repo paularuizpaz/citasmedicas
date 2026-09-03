@@ -1,41 +1,84 @@
-<%- include('layout', { title, body: `
-  <section class="card panel">
-    <h2>Registro de odontólogo</h2>
-    <% if (error) { %>
-      <div class="alert error"><%= error %></div>
-    <% } %>
-    <% if (success) { %>
-      <div class="alert success"><%= success %></div>
-    <% } %>
+<%
+const body = `
+  <section class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="eyebrow">Administración</span>
+        <h2>Registrar doctor</h2>
+      </div>
 
-    <form method="POST" action="/doctor/register">
-      <div class="form-grid">
-        <div>
-          <label>Especialidad</label>
-          <select name="specialty" required>
-            <option value="Odontología general">Odontología general</option>
-            <option value="Ortodoncia">Ortodoncia</option>
-            <option value="Implantología">Implantología</option>
-            <option value="Endodoncia">Endodoncia</option>
-            <option value="Estética dental">Estética dental</option>
-          </select>
+      ${error ? `<div class="alert error">${error}</div>` : ''}
+      ${success ? `<div class="alert success">${success}</div>` : ''}
+
+      <form method="POST" action="/doctor/register">
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <div class="form-grid">
+          <div>
+            <label>Nombre</label>
+            <input name="first_name" required placeholder="Ej. Carlos" />
+          </div>
+          <div>
+            <label>Apellido</label>
+            <input name="last_name" required placeholder="Ej. Rojas" />
+          </div>
+          <div>
+            <label>Carnet de identidad</label>
+            <input name="ci" required placeholder="Ej. 12345678" />
+          </div>
+          <div>
+            <label>Celular</label>
+            <input name="phone" placeholder="Ej. 700 123 456" />
+          </div>
+          <div>
+            <label>Correo electrónico</label>
+            <input type="email" name="email" required placeholder="doctor@clinica.com" />
+          </div>
+          <div>
+            <label>Contraseña inicial</label>
+            <input type="password" name="password" required placeholder="********" />
+          </div>
+          <div>
+            <label>Especialidad</label>
+            <select name="specialty" required>
+              <option value="Odontología general">Odontología general</option>
+              <option value="Ortodoncia">Ortodoncia</option>
+              <option value="Implantología">Implantología</option>
+              <option value="Endodoncia">Endodoncia</option>
+              <option value="Estética dental">Estética dental</option>
+            </select>
+          </div>
+          <div>
+            <label>Años de experiencia</label>
+            <input type="number" name="experience_years" min="0" value="0" required />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label>Disponibilidad</label>
+            <textarea name="availability" placeholder="Ej. Lunes a viernes de 9:00 a 17:00, con pausa de almuerzo de 13:00 a 14:00.">Lunes a viernes de 9:00 a 17:00.</textarea>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label>Biografía profesional</label>
+            <textarea name="bio" placeholder="Descripción de la experiencia y enfoque clínico.">Especialista en salud oral con enfoque preventivo y restaurativo.</textarea>
+          </div>
         </div>
-        <div>
-          <label>Años de experiencia</label>
-          <input type="number" name="experience_years" min="0" value="0" required />
+        <div class="auth-actions">
+          <button type="submit" class="btn">Guardar perfil</button>
         </div>
-        <div style="grid-column: 1 / -1;">
-          <label>Disponibilidad</label>
-          <textarea name="availability" placeholder="Ej. Lunes a viernes de 9:00 a 17:00, con pausa de almuerzo de 13:00 a 14:00.">Lunes a viernes de 9:00 a 17:00.</textarea>
-        </div>
-        <div style="grid-column: 1 / -1;">
-          <label>Biografía profesional</label>
-          <textarea name="bio" placeholder="Descripción de la experiencia y enfoque clínico.">Especialista en salud oral con enfoque preventivo y restaurativo.</textarea>
-        </div>
+      </form>
+    </div>
+
+    <aside class="benefit-panel">
+      <div class="mini-stat">
+        <span>Especialistas</span>
+        <strong>+120</strong>
       </div>
-      <div style="margin-top: 20px;">
-        <button type="submit" class="btn">Guardar perfil</button>
-      </div>
-    </form>
+      <h3>Tu experiencia clínica, mejor representada</h3>
+      <ul class="benefit-list">
+        <li>Perfil con especialidades visibles</li>
+        <li>Disponibilidad organizada por horario</li>
+        <li>Mayor confianza para los pacientes</li>
+      </ul>
+    </aside>
   </section>
-`}) %>
+`;
+%>
+<%- include('layout', { title, body }) %>

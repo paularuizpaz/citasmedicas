@@ -1,0 +1,62 @@
+<%
+const body = `
+  <section class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-header">
+        <span class="eyebrow">Perfil profesional</span>
+        <h2>Modificar datos del doctor</h2>
+      </div>
+      ${error ? `<div class="alert error">${error}</div>` : ''}
+      ${success ? `<div class="alert success">${success}</div>` : ''}
+      <form method="POST" action="/doctors/${doctor.id}/edit">
+        <input type="hidden" name="_csrf" value="${csrfToken}">
+        <div class="form-grid">
+          <div>
+            <label for="full_name">Nombre completo</label>
+            <input id="full_name" name="full_name" value="${doctor.full_name}" required />
+          </div>
+          <div>
+            <label for="ci">Carnet de identidad</label>
+            <input id="ci" value="${doctor.ci}" disabled />
+          </div>
+          <div>
+            <label for="email">Correo electrónico</label>
+            <input id="email" type="email" name="email" value="${doctor.email}" required />
+          </div>
+          <div>
+            <label for="phone">Celular</label>
+            <input id="phone" name="phone" value="${doctor.phone || ''}" />
+          </div>
+          <div>
+            <label for="specialty">Especialidad</label>
+            <select id="specialty" name="specialty" required>
+              ${['Odontología general', 'Ortodoncia', 'Implantología', 'Endodoncia', 'Estética dental'].map(item => `<option ${item === doctor.specialty ? 'selected' : ''}>${item}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label for="experience_years">Años de experiencia</label>
+            <input id="experience_years" type="number" name="experience_years" min="0" value="${doctor.experience_years || 0}" required />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label for="availability">Disponibilidad</label>
+            <textarea id="availability" name="availability">${doctor.availability || ''}</textarea>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label for="bio">Biografía profesional</label>
+            <textarea id="bio" name="bio">${doctor.bio || ''}</textarea>
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label for="password">Nueva contraseña (opcional)</label>
+            <input id="password" type="password" name="password" placeholder="Dejar vacío para conservar la actual" />
+          </div>
+        </div>
+        <div class="auth-actions">
+          <button type="submit" class="btn">Guardar cambios</button>
+          <a href="/doctors" class="button-link">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </section>
+`;
+%>
+<%- include('layout', { title, body, user }) %>

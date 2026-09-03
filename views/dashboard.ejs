@@ -1,72 +1,155 @@
-<%- include('layout', { title, body: `
-  <section class="card hero">
-    <h1>Panel principal</h1>
-    <p>Bienvenido, <strong><%= user.full_name %></strong>. Revisa tus citas, disponibilidad y notificaciones.</p>
+<%
+const doctorsList = doctors.map((doctor) => `
+  <li>
+    <div>
+      <strong>${doctor.full_name}</strong>
+      <span class="muted">${doctor.specialty}</span>
+    </div>
+  </li>
+`).join('');
+
+const notificationsList = notifications.length
+  ? `<ul class="list">${notifications.map((n) => `<li>${n.message}</li>`).join('')}</ul>`
+  : '<p class="muted">No tienes notificaciones por ahora.</p>';
+
+const appointmentsTable = appointments.length
+  ? `
+    <table>
+      <thead>
+        <tr>
+          <th>Paciente / Doctor</th>
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Tratamiento</th>
+          <th>Estado</th>
+          ${user.role === 'doctor' ? '<th>Acción</th>' : ''}
+        </tr>
+      </thead>
+      <tbody>
+        ${appointments.map((a) => `
+          <tr>
+            <td>${a.patient_name || a.doctor_name}</td>
+            <td>${a.appointment_date}</td>
+            <td>${a.appointment_time}</td>
+            <td>${a.treatment}</td>
+            <td><span class="status-pill ${a.status === 'cancelled' ? 'cancelled' : ''}">${a.status === 'cancelled' ? 'cancelada' : a.status}</span></td>
+            ${user.role === 'doctor' ? `<td>${a.status !== 'cancelled' ? `<form method="POST" action="/appointments/${a.id}/cancel" class="cancel-form" onsubmit="return confirm('¿Confirmas la cancelación de esta cita?');"><input type="hidden" name="_csrf" value="${csrfToken}"><input name="reason" maxlength="300" placeholder="Motivo (opcional)"><button type="submit" class="btn danger cancel-button">Cancelar</button></form>` : '<span class="muted">Sin acción</span>'}</td>` : ''}
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `
+  : '<p class="muted">Aún no tienes citas agendadas.</p>';
+
+const analyticsData = typeof analytics !== 'undefined' ? analytics : null;
+const maxDayTotal = analyticsData && analyticsData.appointmentsByDay.length ? Math.max(...analyticsData.appointmentsByDay.map(day => day.total)) : 1;
+const maxDoctorTotal = analyticsData && analyticsData.appointmentsByDoctor.length ? Math.max(...analyticsData.appointmentsByDoctor.map(doctor => doctor.total)) : 1;
+const maxHourTotal = analyticsData && analyticsData.appointmentsByHour.length ? Math.max(...analyticsData.appointmentsByHour.map(hour => hour.total)) : 1;
+const analyticsSection = analyticsData ? `
+  <section class="premium-card" style="margin-bottom: 30px;">
+    <div class="eyebrow">Decisiones administrativas</div>
+    <h2 style="margin: 10px 0 8px;">Indicadores de citas</h2>
+    <p class="muted" style="margin: 0 0 20px;">Resumen de la demanda registrada para organizar médicos y horarios.</p>
+
+    <section class="metric-grid" style="margin: 0 0 26px;">
+      <div class="metric-box">
+        <strong>${analyticsData.totalAppointments}</strong>
+        <span>Citas registradas</span>
+      </div>
+      <div class="metric-box">
+        <strong>${analyticsData.appointmentsByDay.length}</strong>
+        <span>Días con actividad</span>
+      </div>
+      <div class="metric-box">
+        <strong>${analyticsData.topDoctor ? analyticsData.topDoctor.total : 0}</strong>
+        <span>Citas del médico líder</span>
+      </div>
+      <div class="metric-box">
+        <strong>${analyticsData.appointmentsByHour[0] ? analyticsData.appointmentsByHour[0].appointment_time : '--'}</strong>
+        <span>Hora más solicitada</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <div>
+        <h3>Citas por día</h3>
+        ${analyticsData.appointmentsByDay.length ? `
+          <div class="bar-chart">${analyticsData.appointmentsByDay.map(day => `<div class="bar-row"><span>${day.appointment_date}</span><div class="bar-track"><i style="width: ${Math.max(8, day.total / maxDayTotal * 100)}%"></i></div><strong>${day.total}</strong></div>`).join('')}</div>
+        ` : '<p class="muted">Aún no hay citas registradas.</p>'}
+      </div>
+
+      <div>
+        <h3>Médicos con más citas</h3>
+        ${analyticsData.appointmentsByDoctor.length ? `
+          <div class="bar-chart">${analyticsData.appointmentsByDoctor.map(doctor => `<div class="bar-row"><span>${doctor.doctor_name}</span><div class="bar-track"><i style="width: ${Math.max(8, doctor.total / maxDoctorTotal * 100)}%"></i></div><strong>${doctor.total}</strong></div>`).join('')}</div>
+        ` : '<p class="muted">Aún no hay citas para comparar médicos.</p>'}
+      </div>
+
+      <div style="grid-column: 1 / -1;">
+        <h3>Horarios elegidos por los pacientes</h3>
+        ${analyticsData.appointmentsByHour.length ? `
+          <div class="bar-chart hour-chart">${analyticsData.appointmentsByHour.map(hour => `<div class="bar-row"><span>${hour.appointment_time}</span><div class="bar-track"><i style="width: ${Math.max(8, hour.total / maxHourTotal * 100)}%"></i></div><strong>${hour.total}</strong></div>`).join('')}</div>
+        ` : '<p class="muted">Aún no hay horarios registrados.</p>'}
+      </div>
+    </div>
   </section>
+` : '';
+
+const body = `
+  <section class="premium-card" style="margin-top: 24px; margin-bottom: 24px;">
+    <div class="eyebrow">Panel principal</div>
+    <h1 style="margin: 10px 0 8px; font-size: clamp(2rem, 2.7vw, 3rem); letter-spacing: -0.06em;">Bienvenido, ${user.full_name}</h1>
+    <p class="muted" style="margin: 0; max-width: 700px; line-height: 1.7;">Revisa tu agenda, disponibilidad y recordatorios para ofrecer una atención más rápida y profesional.</p>
+  </section>
+
+  <section class="metric-grid" style="margin-bottom: 22px;">
+    <div class="metric-box">
+      <strong>${appointments.length}</strong>
+      <span>Citas programadas</span>
+    </div>
+    <div class="metric-box">
+      <strong>${doctors.length}</strong>
+      <span>Especialistas</span>
+    </div>
+    <div class="metric-box">
+      <strong>${notifications.length}</strong>
+      <span>Notificaciones</span>
+    </div>
+    <div class="metric-box">
+      <strong>${user.role}</strong>
+      <span>Perfil</span>
+    </div>
+  </section>
+
+  ${analyticsSection}
 
   <section class="grid" style="margin-bottom: 30px;">
-    <div class="card panel">
-      <h3>Resumen</h3>
+    <div class="premium-card">
+      <h3>Resumen del perfil</h3>
       <ul class="list">
-        <li><strong>Rol:</strong> <%= user.role %></li>
-        <li><strong>Correo:</strong> <%= user.email %></li>
-        <li><strong>Cédula:</strong> <%= user.ci %></li>
+        <li><strong>Rol:</strong> ${user.role}</li>
+        <li><strong>Correo:</strong> ${user.email}</li>
+        <li><strong>Cédula:</strong> ${user.ci}</li>
       </ul>
     </div>
 
-    <div class="card panel">
+    <div class="premium-card">
       <h3>Odontólogos disponibles</h3>
       <ul class="list">
-        <% doctors.forEach((doctor) => { %>
-          <li>
-            <strong><%= doctor.full_name %></strong><br />
-            <span class="muted"><%= doctor.specialty %></span>
-          </li>
-        <% }) %>
+        ${doctorsList}
       </ul>
     </div>
   </section>
 
-  <section class="card panel" style="margin-bottom: 30px;">
+  <section class="premium-card" style="margin-bottom: 30px;">
     <h3>Notificaciones</h3>
-    <% if (!notifications.length) { %>
-      <p class="muted">No tienes notificaciones por ahora.</p>
-    <% } else { %>
-      <ul class="list">
-        <% notifications.forEach((n) => { %>
-          <li><%= n.message %></li>
-        <% }) %>
-      </ul>
-    <% } %>
+    ${notificationsList}
   </section>
 
-  <section class="card panel">
+  <section class="premium-card">
     <h3>Citas programadas</h3>
-    <% if (!appointments.length) { %>
-      <p class="muted">Aún no tienes citas agendadas.</p>
-    <% } else { %>
-      <table>
-        <thead>
-          <tr>
-            <th>Paciente / Doctor</th>
-            <th>Fecha</th>
-            <th>Hora</th>
-            <th>Tratamiento</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% appointments.forEach((a) => { %>
-            <tr>
-              <td><%= a.patient_name || a.doctor_name %></td>
-              <td><%= a.appointment_date %></td>
-              <td><%= a.appointment_time %></td>
-              <td><%= a.treatment %></td>
-              <td><%= a.status %></td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    <% } %>
+    ${appointmentsTable}
   </section>
-`}) %>
+`;
+%>
+<%- include('layout', { title, body }) %>
