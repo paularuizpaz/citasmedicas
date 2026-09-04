@@ -2,43 +2,53 @@
 
 ## 1. Objetivo del sistema
 
-La aplicación está pensada para dos tipos de usuarios:
+Esta aplicación permite gestionar citas odontológicas desde un flujo sencillo de tres actores:
 
-- Pacientes: pueden registrarse, iniciar sesión y solicitar citas médicas.
-- Doctores: pueden registrarse como profesionales y dejar su perfil disponible para que los pacientes agenden con ellos.
+- Paciente: puede registrarse, iniciar sesión y reservar citas.
+- Doctor: puede tener perfil profesional y recibir solicitudes de agenda.
+- Administrador: crea perfiles de odontólogos y supervisa la operación inicial del sistema.
 
 El flujo principal es:
 
-1. Un paciente crea su cuenta.
-2. Un doctor registra su perfil profesional.
-3. El paciente solicita una cita.
-4. El sistema valida disponibilidad y confirma la solicitud.
+1. El administrador registra a los odontólogos.
+2. Un paciente crea su cuenta y accede al sistema.
+3. El paciente selecciona doctor, fecha y horario disponible.
+4. La cita queda registrada y el doctor recibe notificación por la app y por correo.
 
-## 2. Requisitos
+## 2. Requisitos previos
 
 - Node.js 18 o superior
 - npm
 - Git
-- Archivo `.env` con las credenciales de Gmail para los correos
+- Archivo `.env` con las credenciales de Gmail para enviar correos
 
-En producción también son obligatorios `NODE_ENV=production`, `SESSION_SECRET`, `ADMIN_CI` y `ADMIN_PASSWORD`. Usa HTTPS y no compartas el archivo `.env`.
+En producción es obligatorio definir:
 
-## 3. Instalación
+- `NODE_ENV=production`
+- `SESSION_SECRET`
+- `ADMIN_CI`
+- `ADMIN_PASSWORD`
+- `EMAIL_USER`
+- `EMAIL_PASS`
+
+Nunca compartas el archivo `.env` ni lo subas a repositorios públicos.
+
+## 3. Instalación y arranque
 
 1. Abre la terminal en la raíz del proyecto.
-2. Instala dependencias:
+2. Instala las dependencias:
 
 ```bash
 npm install
 ```
 
-3. Crea el archivo `.env`:
+3. Crea el archivo `.env` a partir del ejemplo si existe:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Completa los datos de Gmail:
+4. Configura las credenciales de Gmail:
 
 ```env
 EMAIL_USER=tu_email@gmail.com
@@ -57,143 +67,248 @@ La aplicación quedará disponible en:
 http://localhost:3000
 ```
 
-## 4. Registro de paciente
+## 4. Acceso inicial y usuario administrador
 
-1. Abre la app.
-2. Haz clic en "Crear cuenta".
-3. Completa los siguientes campos:
-   - nombre completo
-   - cédula
-   - correo electrónico
-   - teléfono
-   - contraseña
-4. Pulsa "Registrarme".
+La primera vez que se ejecuta la app, se crea automáticamente un usuario administrador si no existe.
 
-Con eso ya queda registrado como paciente y puede entrar al sistema.
+Credenciales por defecto de desarrollo:
 
-## 5. Inicio de sesión
+- Usuario/Carnet: `admin`
+- Contraseña: `admin123`
 
-1. Ingresa a la pantalla de login.
-2. Escribe tu cédula y contraseña.
-3. Haz clic en "Entrar".
+En producción es recomendable cambiar estas credenciales mediante variables de entorno:
 
-Si los datos son correctos, el sistema te lleva al dashboard.
+- `ADMIN_CI`
+- `ADMIN_PASSWORD`
+- `ADMIN_NAME`
+- `ADMIN_EMAIL`
 
-## 6. Panel principal del paciente
+## 5. Registro de paciente
 
-Desde el dashboard el paciente puede ver:
+1. Abre la app en `/register`.
+2. Completa los campos obligatorios:
+   - Nombre
+   - Apellido
+   - Cédula de identidad
+   - Celular
+   - Correo electrónico
+   - Contraseña
+3. Pulsa "Registrarme".
 
-- su perfil
-- citas programadas
-- lista de doctores disponibles
-- notificaciones
-- resumen general de la actividad
+Después del registro, el sistema crea automáticamente la cuenta del paciente y lo lleva al dashboard.
 
-## 7. Registro de doctor
+## 6. Inicio de sesión
 
-La parte del doctor no la hace el paciente, sino que un usuario se registra como profesional desde su propia cuenta.
+1. Accede a `/login`.
+2. Ingresa la cédula y la contraseña.
+3. Presiona "Entrar".
 
-### Paso a paso
+Si los datos son correctos, se abre el dashboard según el rol del usuario.
 
-1. Inicia sesión con la cuenta que va a actuar como doctor.
-2. Entra a la ruta de registro profesional.
-3. Completa:
-   - especialidad
-   - años de experiencia
-   - disponibilidad
-   - biografía profesional
-4. Guarda el perfil.
+## 7. Roles y permisos del sistema
 
-Cuando se registra correctamente:
+### Paciente
 
-- se crea el perfil de doctor
-- el usuario cambia su rol a doctor
-- queda visible para que los pacientes puedan solicitar citas con él
+Permite:
 
-## 8. Solicitud de cita por parte del paciente
+- registrarse y acceder al dashboard
+- ver doctores disponibles
+- solicitar nuevas citas
+- consultar sus citas
+- recibir notificaciones
 
-1. Inicia sesión como paciente.
-2. Ve a la opción de nueva cita.
-3. Elige:
-   - doctor
+### Doctor
+
+Permite:
+
+- gestionar su perfil profesional
+- ver su agenda
+- recibir citas asignadas
+- cancelar citas si corresponde
+
+### Administrador
+
+Permite:
+
+- registrar nuevos médicos
+- mantener perfiles profesionales activos
+- revisar la operación general del sistema
+
+## 8. Registro de doctor por parte del administrador
+
+El registro de profesionales no lo hace el paciente; lo hace el administrador desde la interfaz correspondiente.
+
+Ruta:
+
+```text
+/doctor/register
+```
+
+Campos del formulario:
+
+- Nombre
+- Apellido
+- Cédula
+- Celular
+- Correo
+- Contraseña inicial
+- Especialidad
+- Años de experiencia
+- Disponibilidad
+- Biografía profesional
+
+La disponibilidad se suele ingresar con texto descriptivo, por ejemplo:
+
+```text
+Lunes a viernes de 9:00 a 17:00.
+```
+
+El sistema usa esa información para calcular los horarios disponibles del doctor.
+
+## 9. Dashboard
+
+Una vez iniciado sesión, el usuario entra a `/dashboard`.
+
+Desde allí puede ver:
+
+- sus citas
+- la lista de doctores
+- notificaciones internas
+- resumen general de la agenda
+- accesos rápidos según el rol
+
+El contenido del dashboard varía según si el usuario es paciente, doctor o administrador.
+
+## 10. Solicitud de una cita
+
+### Como paciente
+
+1. Inicia sesión.
+2. Dirígete a la ruta:
+
+```text
+/appointments/new
+```
+
+3. Selecciona:
+   - odontólogo
    - fecha
    - horario disponible
    - tratamiento
-4. Confirmas la reserva.
 
-El sistema valida que el horario está disponible y registra la cita.
+4. Confirma la reserva.
 
-## 9. Cómo funciona la disponibilidad
+El sistema valida que la hora elegida siga disponible y que no esté duplicada con otra cita del mismo doctor en la misma fecha.
 
-La aplicación calcula horarios disponibles según:
+## 11. Cómo se calculan los horarios disponibles
 
-- horario laboral del doctor
-- duración de cada cita
-- pausas de comida
-- citas ya reservadas
+La disponibilidad del doctor se interpreta con base en su agenda y en las citas ya reservadas.
 
-Esto evita que dos pacientes agenden la misma hora.
+La aplicación toma en cuenta:
 
-## 10. Notificaciones y correos
+- horario del doctor
+- duración estándar de la cita (30 minutos)
+- días no laborables o no habilitados
+- citas existentes en la misma fecha
 
-Cuando el paciente solicita una cita, el sistema:
+Si el doctor tiene una agenda completa o un horario ya ocupado, ese espacio no aparece como disponible para elegir.
 
-- crea una notificación para el doctor
-- envía un aviso al correo del doctor
-- envía una confirmación al correo del paciente
+## 12. Pacientes registrados y pacientes nuevos
 
-Los correos solo se enviarán si `.env` tiene configurados `EMAIL_USER` y `EMAIL_PASS` con una cuenta de Gmail y una contraseña de aplicación válida.
+En la creación de citas, el sistema admite dos escenarios:
 
-## 11. Cerrar sesión
+- Un paciente ya registrado en la base de datos.
+- Un paciente nuevo que se registra al momento de agendar la cita.
 
-En la parte superior de la interfaz, usa el botón de cierre de sesión para salir del sistema.
+Esto es útil cuando un doctor o administrador está reservando citas desde una cuenta de atención.
 
-## 12. Roles del sistema
+## 13. Notificaciones y correos
 
-- Paciente: puede registrarse y solicitar citas.
-- Doctor: puede registrarse como profesional y recibir solicitudes de citas.
+Cuando se agenda una cita, el sistema:
 
-## 13. Rutas principales
+- crea una notificación interna para el doctor
+- envía un correo al doctor con el detalle de la cita
+- envía una confirmación al correo del paciente si está disponible
+
+Los correos se habilitan solo si el archivo `.env` contiene datos válidos de Gmail:
+
+```env
+EMAIL_USER=tu_email@gmail.com
+EMAIL_PASS=tu_contraseña_de_aplicación
+```
+
+> Importante: la contraseña debe ser una contraseña de aplicación de Gmail, no la contraseña normal de la cuenta.
+
+## 14. Cancelación de citas
+
+Los médicos pueden cancelar citas desde la operación de la aplicación correspondiente a la agenda o a la vista de citas. Cuando se cancela:
+
+- cambia el estado de la cita
+- se registra una nota de motivo
+- se envía notificación al paciente
+- se envía correo de cancelación
+
+## 15. Cerrar sesión
+
+En la parte superior de la interfaz, el usuario puede cerrar sesión para salir del sistema.
+
+Ruta:
 
 ```text
-/login
-/register
-/dashboard
-/doctor/register
-/appointments/new
 /logout
 ```
 
-## 14. Flujo recomendado para probar la app
+## 16. Rutas principales
 
-1. Registra un paciente.
-2. Registra una cuenta para doctor y completa su perfil profesional.
-3. Inicia sesión como paciente.
-4. Solicita una cita.
-5. Verifica la cita en el dashboard y confirma que el doctor recibió la notificación.
+```text
+/
+/login
+/register
+/logout
+/dashboard
+/doctor/register
+/appointments/new
+/doctors
+/schedules
+```
 
-## 15. Problemas comunes
+## 17. Flujo recomendado para probar la aplicación
 
-### La app no inicia
+1. Inicia la app con `npm start`.
+2. Inicia sesión como administrador con `admin` / `admin123`.
+3. Registra al menos un doctor desde `/doctor/register`.
+4. Cierra sesión y crea una cuenta de paciente desde `/register`.
+5. Inicia sesión como paciente.
+6. Agenda una cita desde `/appointments/new`.
+7. Verifica que la cita aparece en el dashboard y que el doctor recibe la notificación.
+
+## 18. Solución de problemas comunes
+
+### La aplicación no inicia
 
 Revisa:
 
-- que Node.js y npm estén instalados
+- que Node.js esté instalado
 - que se haya ejecutado `npm install`
-- que el archivo `.env` exista y tenga los valores correctos
+- que el archivo `.env` exista y contenga los valores necesarios
 
 ### Puerto ocupado
 
-Si el puerto 3000 ya está en uso, debes cerrar el proceso anterior o cambiar el puerto en `.env`.
+Si el puerto `3000` ya está en uso, cierra el proceso anterior o cambia el puerto en la configuración del entorno.
 
-### No llegan los correos
+### No llegan correos
 
 Verifica que:
 
 - `EMAIL_USER` esté bien escrito
-- `EMAIL_PASS` sea la contraseña de aplicación correcta
-- tu configuración de Gmail permita el envío desde la app
+- `EMAIL_PASS` sea una contraseña de aplicación válida
+- Gmail permita el envío desde la aplicación
+- el archivo `.env` esté cargado correctamente
+
+### El administrador no puede iniciar sesión
+
+Comprueba que la base de datos se haya inicializado correctamente y que el usuario `admin` exista en la tabla de usuarios.
 
 ---
 
-La idea central es esta: los pacientes solicitan citas y los doctores se registran y quedan disponibles para recibir esas solicitudes.
+La idea central del sistema es simple: el administrador registra médicos, los pacientes reservan citas en la agenda disponible y el sistema coordina la operación con notificaciones internas y correos electrónicos.

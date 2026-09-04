@@ -15,6 +15,7 @@ const { sendAppointmentEmail, sendAppointmentCancellationEmail, verifyMailer } =
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
+const dataDir = process.env.DATA_DIR || path.join(__dirname, 'data');
 
 if (isProduction && !process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET es obligatorio en producción.');
@@ -48,7 +49,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-only-change-this-secret',
-  store: new SQLiteStore({ db: 'sessions.db', dir: path.join(__dirname, 'data') }),
+  store: new SQLiteStore({ db: 'sessions.db', dir: dataDir }),
   resave: false,
   saveUninitialized: false,
   cookie: {
